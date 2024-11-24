@@ -19,49 +19,53 @@ class WeatherApp:
 
             if data['cod'] == 200:
                 WeatherApp.display_weather(data, self)
-                print(data)
+                lon = data['coord']['lon']
+                lat = data['coord']['lat']
+                WeatherApp.get_weather_forecast(lon, lat, self)
+
+                print(data)  # Вывод в консоль.
 
         except requests.exceptions.HTTPError as HTTP_error:
             match response.status_code:
                 case 400:
-                    WeatherApp.display_error(
+                    WeatherApp.weather_error(
                         'Bad Request\nПроверьте, корректность запроса', self)
                 case 401:
-                    WeatherApp.display_error(
+                    WeatherApp.weather_error(
                         'Unauthorized\nAPI-key не действителен/не активен', self)
                 case 403:
-                    WeatherApp.display_error('Forbidden\nДоступ запрещен', self)
+                    WeatherApp.weather_error('Forbidden\nДоступ запрещен', self)
                 case 404:
-                    WeatherApp.display_error('Not Found\nГород не найден', self)
+                    WeatherApp.weather_error('Not Found\nГород не найден', self)
                 case 500:
-                    WeatherApp.display_error('Internal Server Error\nПожалуйста, '
+                    WeatherApp.weather_error('Internal Server Error\nПожалуйста, '
                                        'повторите попытку позже', self)
                 case 502:
-                    WeatherApp.display_error(
+                    WeatherApp.weather_error(
                         ' Bad Gateway\nНекорректный ответ от сервера', self)
                 case 503:
-                    WeatherApp.display_error(
+                    WeatherApp.weather_error(
                         'Service Unavailable\nСервер не работает', self)
                 case 504:
-                    WeatherApp.display_error(
+                    WeatherApp.weather_error(
                         'Gateway Timeout\nСервер не отвечает', self)
                 case _:
-                    WeatherApp.display_error(
+                    WeatherApp.weather_error(
                         f'Произошла ошибка HTTP\n{HTTP_error} ', self)
 
 
         except requests.exceptions.ConnectionError:
-            WeatherApp.display_error(
+            WeatherApp.weather_error(
                 f'Connection Error\nПроверьте подключение к сети Интернет.', self)
 
         except requests.exceptions.Timeout:
-            WeatherApp.display_error(f'Timeout Error\nДолгое ожидание ответа.', self)
+            WeatherApp.weather_error(f'Timeout Error\nДолгое ожидание ответа.', self)
 
         except requests.exceptions.TooManyRedirects:
-            WeatherApp.display_error(f'Too many Redirects\nПроверь URL.', self)
+            WeatherApp.weather_error(f'Too many Redirects\nПроверь URL.', self)
 
         except requests.exceptions.RequestException as request_error:
-            WeatherApp.display_error(f'Request Error\n{request_error}', self)
+            WeatherApp.weather_error(f'Request Error\n{request_error}', self)
 
     @staticmethod
     def display_weather(data, self):
@@ -111,7 +115,76 @@ class WeatherApp:
 
 
     @staticmethod
-    def display_error(message, self):
+    def get_weather_forecast(lon, lat, self):
+        api_key = '29cc733366e62c9b6a691e87b96b2f3a'
+        url = (f'https://api.openweathermap.org/data/2.5/forecast?'
+               f'lat={lat}&lon={lon}&appid={api_key}&units=metric&lang=ru')
+
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+
+
+            if int(data['cod']) == 200:
+
+                WeatherApp.display_weather_forecast(data, self)
+
+
+        except requests.exceptions.HTTPError as HTTP_error:
+            match response.status_code:
+                case 400:
+                    WeatherApp.forecast_error(
+                        'Bad Request\nПроверьте, корректность запроса', self)
+                case 401:
+                    WeatherApp.forecast_error(
+                        'Unauthorized\nAPI-key не действителен/не активен',
+                        self)
+                case 403:
+                    WeatherApp.forecast_error('Forbidden\nДоступ запрещен',
+                                             self)
+                case 404:
+                    WeatherApp.forecast_error('Not Found\nГород не найден',
+                                             self)
+                case 500:
+                    WeatherApp.forecast_error(
+                        'Internal Server Error\nПожалуйста, '
+                        'повторите попытку позже', self)
+                case 502:
+                    WeatherApp.forecast_error(
+                        ' Bad Gateway\nНекорректный ответ от сервера', self)
+                case 503:
+                    WeatherApp.forecast_error(
+                        'Service Unavailable\nСервер не работает', self)
+                case 504:
+                    WeatherApp.forecast_error(
+                        'Gateway Timeout\nСервер не отвечает', self)
+                case _:
+                    WeatherApp.forecast_error(
+                        f'Произошла ошибка HTTP\n{HTTP_error} ', self)
+
+
+        except requests.exceptions.ConnectionError:
+            WeatherApp.forecast_error(
+                f'Connection Error\nПроверьте подключение к сети Интернет.',
+                self)
+
+        except requests.exceptions.Timeout:
+            WeatherApp.forecast_error(f'Timeout Error\nДолгое ожидание ответа.',
+                                     self)
+
+        except requests.exceptions.TooManyRedirects:
+            WeatherApp.forecast_error(f'Too many Redirects\nПроверь URL.', self)
+
+        except requests.exceptions.RequestException as request_error:
+            WeatherApp.forecast_error(f'Request Error\n{request_error}', self)
+
+    @staticmethod
+    def display_weather_forecast(data, self):
+        pass
+
+    @staticmethod
+    def weather_error(message, self):
         self.city_label.clear()
         self.temperature_now_label.clear()
         self.feels_like_label.clear()
@@ -123,6 +196,10 @@ class WeatherApp:
         self.pressure_label.clear()
         self.temperature_now_label.setStyleSheet('font-size: 20px')
         self.temperature_now_label.setText(message)
+
+    @staticmethod
+    def forecast_error(message, self):
+        pass
 
 
     @staticmethod

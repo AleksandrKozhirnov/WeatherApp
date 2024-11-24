@@ -27,7 +27,6 @@ class MainWindow(QWidget):
         self.pressure_label = QLabel()
         self.forecast_label = QLabel('ПРОГНОЗ НА 3 ДНЯ')
 
-
         self.init_gui()
 
     def init_gui(self):
