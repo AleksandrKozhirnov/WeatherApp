@@ -1,6 +1,7 @@
-import json
 
 import requests
+from  datetime import datetime, timedelta
+from collections import Counter
 
 
 class WeatherApp:
@@ -125,11 +126,77 @@ class WeatherApp:
             response.raise_for_status()
             data = response.json()
 
-
             if int(data['cod']) == 200:
+                list_temp_1 = []
+                list_description_1 = []
+                list_weather_id_1 = []
 
-                WeatherApp.display_weather_forecast(data, self)
+                list_temp_2 = []
+                list_description_2 = []
+                list_weather_id_2 = []
 
+                list_temp_3 = []
+                list_description_3 = []
+                list_weather_id_3 = []
+
+                for i in data['list']:
+                    if (int(datetime.fromtimestamp(i['dt']).strftime('%d'))
+                            == int((datetime.now()+timedelta(days=1)).strftime('%d'))):
+                        list_temp_1.append(i['main']['temp'])
+                        list_description_1.append(i['weather'][0]['description'])
+                        list_weather_id_1.append(i['weather'][0]['id'])
+
+
+                    elif (int(datetime.fromtimestamp(i['dt']).strftime('%d'))
+                            == int((datetime.now()+timedelta(days=2)).strftime('%d'))):
+                        list_temp_2.append(i['main']['temp'])
+                        list_description_2.append(i['weather'][0]['description'])
+                        list_weather_id_2.append(i['weather'][0]['id'])
+
+                    elif (int(datetime.fromtimestamp(i['dt']).strftime('%d'))
+                            == int((datetime.now()+timedelta(days=3)).strftime('%d'))):
+                        list_temp_3.append(i['main']['temp'])
+                        list_description_3.append(i['weather'][0]['description'])
+                        list_weather_id_3.append(i['weather'][0]['id'])
+
+                forecast_temp = []
+                forecast_description = []
+                forecast_id = []
+
+                forecast_temp.append(sum(list_temp_1) / len(list_temp_1))
+                forecast_temp.append(sum(list_temp_2) / len(list_temp_2))
+                forecast_temp.append(sum(list_temp_3) / len(list_temp_3))
+
+                most_pop_descr_1 = (
+                    Counter(list_description_1).most_common(1))[0][0]
+                forecast_description.append(most_pop_descr_1)
+
+                most_pop_descr_2 = (
+                    Counter(list_description_2).most_common(1))[0][0]
+                forecast_description.append(most_pop_descr_2)
+
+                most_pop_descr_3 = (
+                    Counter(list_description_3).most_common(1))[0][0]
+                forecast_description.append(most_pop_descr_3)
+
+                most_pop_id_1 = (
+                    Counter(list_weather_id_1).most_common(1))[0][0]
+                forecast_id.append(most_pop_id_1)
+                most_pop_id_2 = (
+                    Counter(list_weather_id_2).most_common(1))[0][0]
+                forecast_id.append(most_pop_id_2)
+
+                most_pop_id_3 = (
+                    Counter(list_weather_id_3).most_common(1))[0][0]
+                forecast_id.append(most_pop_id_3)
+
+                zipped = zip(forecast_temp, forecast_description,
+                                 forecast_id)
+                final_data = list(zipped)
+
+                print(final_data)  # Убрать
+
+                WeatherApp.display_weather_forecast(final_data, self)
 
         except requests.exceptions.HTTPError as HTTP_error:
             match response.status_code:
@@ -181,7 +248,42 @@ class WeatherApp:
 
     @staticmethod
     def display_weather_forecast(data, self):
-        pass
+
+        self.day_1_label.setText(f'{(datetime.now()+timedelta(days=1)).strftime('%d.%m')}')
+        self.day_2_label.setText(f'{(datetime.now()+timedelta(days=2)).strftime('%d.%m')}')
+        self.day_3_label.setText(f'{(datetime.now()+timedelta(days=3)).strftime('%d.%m')}')
+
+
+        emoji_value_1 = WeatherApp.get_emoji(data[0][2])
+        self.forecast_emoji_label_1.setText(f'{emoji_value_1}')
+
+
+        emoji_value_2 = WeatherApp.get_emoji(data[1][2])
+        self.forecast_emoji_label_2.setText(f'{emoji_value_2}')
+
+        emoji_value_3 = WeatherApp.get_emoji(data[2][2])
+        self.forecast_emoji_label_3.setText(f'{emoji_value_3}')
+
+        temp_value_1 = data[0][0]
+        self.forecast_label_1.setStyleSheet('font-size: 35px;'
+                                            'font-weight: bold')
+        self.forecast_label_1.setText(f'  {temp_value_1:.0f} C°')
+
+        temp_value_2 = data[1][0]
+        self.forecast_label_2.setText(f'  {temp_value_2:.0f} C°')
+
+        temp_value_3 = data[2][0]
+        self.forecast_label_3.setText(f'  {temp_value_3:.0f} C°')
+
+        descr_value_1 = data[0][1]
+        self.forecast_description_1.setText(f'{descr_value_1.capitalize()}')
+
+        descr_value_2 = data[1][1]
+        self.forecast_description_2.setText(f'{descr_value_2.capitalize()}')
+
+        descr_value_3 = data[2][1]
+        self.forecast_description_3.setText(f'{descr_value_3.capitalize()}')
+
 
     @staticmethod
     def weather_error(message, self):
@@ -194,12 +296,32 @@ class WeatherApp:
         self.humidity_label.clear()
         self.wind_label.clear()
         self.pressure_label.clear()
+        self.forecast_emoji_label_1.clear()
+        self.forecast_emoji_label_2.clear()
+        self.forecast_emoji_label_3.clear()
+        self.forecast_label_1.clear()
+        self.forecast_label_2.clear()
+        self.forecast_label_3.clear()
+        self.forecast_description_1.clear()
+        self.forecast_description_2.clear()
+        self.forecast_description_3.clear()
         self.temperature_now_label.setStyleSheet('font-size: 20px')
+        self.forecast_label_1.setStyleSheet('font-size: 20px')
         self.temperature_now_label.setText(message)
+        self.forecast_label_1.setText(message)
 
     @staticmethod
     def forecast_error(message, self):
-        pass
+        self.forecast_emoji_label_1.clear()
+        self.forecast_emoji_label_2.clear()
+        self.forecast_emoji_label_3.clear()
+        self.forecast_label_1.setStyleSheet('font-size: 20px')
+        self.forecast_label_2.clear()
+        self.forecast_label_3.clear()
+        self.forecast_description_1.clear()
+        self.forecast_description_2.clear()
+        self.forecast_description_3.clear()
+        self.forecast_label_1.setText(message)
 
 
     @staticmethod
@@ -255,3 +377,6 @@ class WeatherApp:
         elif 292.5 <= wind_deg_value <= 337.5:
             return 'СЗ'
 
+    @staticmethod
+    def get_date(dt):
+        return datetime.fromtimestamp(dt).strftime('%d')
