@@ -5,11 +5,43 @@ from collections import Counter
 
 
 class WeatherApp:
+    """
+    Класс описывает логическую часть программы в приложении в части
+    запроса, обработки полученной информации с 'https://openweathermap.org/'
+    и вывода ее на экран приложения.
+    """
 
     @staticmethod
     def get_weather(city, self):
+        """
+        Статический метод класса. Выполняет API-запрос с сайта
+        'https://openweathermap.org/'.
+
+        Args:
+            city: Город по которому запрашивается погода
+            self: Экземпляр класса 'MainWindow' модуля 'gui_modul'.
+
+        Returns:
+            При положительном ответе возвращает массив данных в формате
+            'json'. Массив передается в другой статический метод класса
+            'display_weather' для обработки и вывода на экран приложения
+            нужной информации.
+
+            Также из ответа берет информацию о географических
+            координатах города (долгота и широта), по которому запрошена
+            погода для формирования иного запроса для получения прогноза
+            погоды на 3 дня. Данный запрос выполняется в методе
+            'get_weather_forecast'.
+
+            В случае возникновения исключений, эти исключения
+            обрабатываются и передаются для вывода на экран приложения
+            в методе 'weather_error' данного класса.
+        """
+
+        #  Публичный ключ.
         api_key = '29cc733366e62c9b6a691e87b96b2f3a'
 
+        # Адрес запроса данных.
         url = (f'https://api.openweathermap.org/data/2.5/weather?q='
                f'{city}&appid={api_key}&units=metric&lang=ru')
 
@@ -19,13 +51,20 @@ class WeatherApp:
             data = response.json()
 
             if data['cod'] == 200:
+                # Вызывается метод для отображения информации на
+                # экране приложения..
                 WeatherApp.display_weather(data, self)
                 lon = data['coord']['lon']
                 lat = data['coord']['lat']
+
+                # Вызывается метод для запроса данных в целях получения
+                # прогноза погоды на 3 дня.
                 WeatherApp.get_weather_forecast(lon, lat, self)
 
-                print(data)  # Вывод в консоль.
+                print(data)  # Вывод в консоль. Для внутр пользования.
 
+        # Обработка ошибок запроса, и вызов метода для отображения
+        # ошибки на экране приложения.
         except requests.exceptions.HTTPError as HTTP_error:
             match response.status_code:
                 case 400:
@@ -70,9 +109,24 @@ class WeatherApp:
 
     @staticmethod
     def display_weather(data, self):
+        """
+
+        Args:
+            data: Полученные данные в методе 'get_weather'
+            self: Экземпляр класса MainWindow модуля 'gui_modul'.
+
+        Returns:
+             Отображает информацию на экране приложения, полученную
+        в методе get_weather.
+        """
         city_name = data['name']
+
+        # Город сохраняем в файл методом 'save_list_city'
         WeatherApp.save_list_city(city_name)
         self.city_label.setText(f'{city_name}')
+
+        # Перенастройка шрифта, т.к. он может меняться при выводе
+        # ошибок при срабатывании метода 'weather_error'.
         self.temperature_now_label.setStyleSheet('font-size: 40px; '
                                            'font-weight: bold')
         temperature_value = data['main']['temp']
@@ -85,6 +139,9 @@ class WeatherApp:
         description_value = data['weather'][0]['description']
         self.description_label.setText(f'{description_value.capitalize()}')
 
+        # Некоторые параметры погоды могут отсутствовать в полученных
+        # данных. Поэтому эти ошибки нужно обработать и вывести
+        # информацию на экран.
         try:
             visibility_value = int(data['visibility']/1000)
             self.visibility_label.setText(f'Видимость\n   '
@@ -92,6 +149,8 @@ class WeatherApp:
         except KeyError:
             self.visibility_label.setText('Видимость недоступна')
 
+        # get_wind_rose - метод для определения направления ветра.
+        # Описан ниже.
         try:
             wind_speed_value = data['wind']['speed']
             wind_deg_value = data['wind']['deg']
@@ -117,6 +176,28 @@ class WeatherApp:
 
     @staticmethod
     def get_weather_forecast(lon, lat, self):
+        """
+             Статический метод класса. Выполняет API-запрос с сайта
+        'https://openweathermap.org/'.
+
+        Args:
+            lon: Долгота. Получена в методе get_weather данного класса.
+            lat: Широта. Получена в методе get_weather данного класса.
+            self: Экземпляр класса 'MainWindow'.
+
+        Returns:
+            При положительном ответе возвращает массив данных в формате
+            'json'. После обработки полученных данных передает в метод
+            'display_weather_forecast' новый массив для отражения на
+            экране приложения.
+
+            В случае возникновения исключений, эти исключения
+            обрабатываются и передаются для вывода на экран приложения
+            в методе 'forecast_error' данного класса
+        """
+
+        # Публичный ключ запрашивается на сайте
+        # https://openweathermap.org/ после регистрации.
         api_key = '29cc733366e62c9b6a691e87b96b2f3a'
         url = (f'https://api.openweathermap.org/data/2.5/forecast?'
                f'lat={lat}&lon={lon}&appid={api_key}&units=metric&lang=ru')
@@ -127,6 +208,13 @@ class WeatherApp:
             data = response.json()
 
             if int(data['cod']) == 200:
+
+                # На каждый день имеется восемь 3-часовых прогнозов.
+                # Их нужно найти в полученном ответе и посчитать
+                # среднюю температуру и вероятность погодных условий.
+                # Формируются списки на каждый день
+                # (температура, описание погоды,код погодных условий).
+                # В каждом списке по 8 позиций.
                 list_temp_1 = []
                 list_description_1 = []
                 list_weather_id_1 = []
@@ -139,6 +227,9 @@ class WeatherApp:
                 list_description_3 = []
                 list_weather_id_3 = []
 
+                # Здесь выбираем по ключу ['dt'] в полученных данных
+                # только даты ближайших трех дней для включения в
+                # списки.
                 for i in data['list']:
                     if (int(datetime.fromtimestamp(i['dt']).strftime('%d'))
                             == int((datetime.now()+timedelta(days=1)).strftime('%d'))):
@@ -159,14 +250,21 @@ class WeatherApp:
                         list_description_3.append(i['weather'][0]['description'])
                         list_weather_id_3.append(i['weather'][0]['id'])
 
+                # Новые списки с усредненными значениями температуры,
+                # описанием погоды и id.
                 forecast_temp = []
                 forecast_description = []
                 forecast_id = []
 
+                # Средние значения температуры на каждый день добавляем
+                # в список
                 forecast_temp.append(sum(list_temp_1) / len(list_temp_1))
                 forecast_temp.append(sum(list_temp_2) / len(list_temp_2))
                 forecast_temp.append(sum(list_temp_3) / len(list_temp_3))
 
+                # Здесь определяются наиболее вероятные сценарии
+                # погодных условий на каждый день и так же формируются
+                # 2 списка.
                 most_pop_descr_1 = (
                     Counter(list_description_1).most_common(1))[0][0]
                 forecast_description.append(most_pop_descr_1)
@@ -190,14 +288,20 @@ class WeatherApp:
                     Counter(list_weather_id_3).most_common(1))[0][0]
                 forecast_id.append(most_pop_id_3)
 
+                # Соотносим данные трех списков по индексу. Формируется
+                # список кортежей в формате:
+                #                 (температура, описание, id погоды)
                 zipped = zip(forecast_temp, forecast_description,
                                  forecast_id)
                 final_data = list(zipped)
 
-                print(final_data)  # Убрать
+                print(final_data)  # Для внутреннего пользования
 
+                # Обращаемся к методу 'display_weather_forecast'
                 WeatherApp.display_weather_forecast(final_data, self)
 
+        # Обработка ошибок второго запроса. И вывод их на экран
+        # приложения с помощью метода 'forecast_error'.
         except requests.exceptions.HTTPError as HTTP_error:
             match response.status_code:
                 case 400:
@@ -248,12 +352,32 @@ class WeatherApp:
 
     @staticmethod
     def display_weather_forecast(data, self):
+        """
+            Принимает данные из метода 'get_weather_forecast'
+        Args:
+            data: Список из трех кортежей в формате:
+                (температура, описание погоды, id погодных условий).
+            self: Экземпляр класса 'MainWindow'.
 
-        self.day_1_label.setText(f'{(datetime.now()+timedelta(days=1)).strftime('%d.%m')}')
-        self.day_2_label.setText(f'{(datetime.now()+timedelta(days=2)).strftime('%d.%m')}')
-        self.day_3_label.setText(f'{(datetime.now()+timedelta(days=3)).strftime('%d.%m')}')
+        Returns:
+            Выводит на экран приложения информацию о прогнозе погоды
+            на ближайшие 3 дня.
+
+        """
+
+        # Заполняет информационные виджеты на экране приложения
+        # (атрибуты класса MainWindow).
+
+        self.day_1_label.setText(f'{(datetime.now()+
+                                     timedelta(days=1)).strftime('%d.%m')}')
+        self.day_2_label.setText(f'{(datetime.now()+
+                                     timedelta(days=2)).strftime('%d.%m')}')
+        self.day_3_label.setText(f'{(datetime.now()+
+                                     timedelta(days=3)).strftime('%d.%m')}')
 
 
+        # get_emoji - статический метод для расшифровки id погоды.
+        # Описан ниже
         emoji_value_1 = WeatherApp.get_emoji(data[0][2])
         self.forecast_emoji_label_1.setText(f'{emoji_value_1}')
 
@@ -287,6 +411,23 @@ class WeatherApp:
 
     @staticmethod
     def weather_error(message, self):
+        """
+            Инициализируется при возникновении ошибок запроса в методе
+            'get_weather'.
+
+        Args:
+            message: Передается в качестве аргумента из метода
+                     get_weather'.
+
+            self: Экземпляр класса 'MainWindow'.
+
+        Returns:
+            Сообщение выводится на экран в виджетах
+            'temperature_now_label' и 'forecast_label_1'
+            класса 'MainWindow'.
+            Информация в остальных виджетах стирается.
+
+        """
         self.city_label.clear()
         self.temperature_now_label.clear()
         self.feels_like_label.clear()
@@ -312,6 +453,20 @@ class WeatherApp:
 
     @staticmethod
     def forecast_error(message, self):
+        """
+            Инициализируется при возникновении ошибок запроса в методе
+            'get_weather_forecast'.
+        Args:
+            message: Передается в качестве аргумента из метода
+            'get_weather_forecast'.
+            self: Экземпляр класса 'MainWindow'
+
+        Returns:
+            Сообщение выводится на экран в виджете forecast_label_1'
+            класса 'MainWindow'.
+            Информация в остальных виджетах очищается.
+
+        """
         self.forecast_emoji_label_1.clear()
         self.forecast_emoji_label_2.clear()
         self.forecast_emoji_label_3.clear()
@@ -326,11 +481,25 @@ class WeatherApp:
 
     @staticmethod
     def save_list_city(city):
+        """
+
+        Args:
+            city: город.
+        Returns:
+            Сохраняет в файл город, используется в методе
+            display_weather.
+        """
         with open('cities.txt', 'a+') as file:
             file.write(f'{city},')
 
     @staticmethod
     def load_last_city():
+        """
+
+        Returns:
+            Загружает данные из файла с городами. Используется при
+            запуске программы. При отсутствии файла создает новый.
+        """
         with open('cities.txt', 'a+') as file:
             file.seek(0)
             string = file.read()
@@ -341,6 +510,16 @@ class WeatherApp:
 
     @staticmethod
     def get_emoji(weather_id):
+        """
+
+        Args:
+            weather_id: Код погоды получаемы в ответе на запрос.
+
+        Returns:
+            Возвращает вместо кода Эмодзи. Используется в методах
+            'display_weather_forecast' и 'display_weather'
+
+        """
         if 200 <= weather_id <= 200:
             return '⛈'
         elif 300 <= weather_id <= 321:
@@ -360,6 +539,15 @@ class WeatherApp:
 
     @staticmethod
     def get_wind_rose(wind_deg_value):
+        """
+            Интерпретирует полученную информацию в градусах о
+            направлении ветра. Используется в методе 'display_weather'.
+        Args:
+            wind_deg_value: Значение в градусах.
+
+        Returns:
+            Возвращает расшифровку направления ветра.
+        """
         if 337.5 < wind_deg_value <= 360 or 0 <= wind_deg_value < 22.5:
             return 'Северный'
         elif 22.5 <= wind_deg_value < 67.5:
@@ -377,6 +565,3 @@ class WeatherApp:
         elif 292.5 <= wind_deg_value <= 337.5:
             return 'СЗ'
 
-    @staticmethod
-    def get_date(dt):
-        return datetime.fromtimestamp(dt).strftime('%d')

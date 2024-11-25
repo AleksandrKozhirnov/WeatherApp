@@ -1,5 +1,5 @@
 import sys
-from encodings.punycode import adapt
+
 
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QLabel, QGridLayout
 from PyQt6.QtCore import Qt
@@ -8,12 +8,17 @@ from logical_module import WeatherApp
 
 
 class MainWindow(QWidget):
+    """
+    Класс описывает интерфейс погодного приложения.
+    """
+
     def __init__(self):
+        """
+        Устанавливает виджеты в окне приложения.
+        """
         super().__init__()
 
         self.setWindowTitle('Погода')
-        self.setMinimumSize(700, 700)
-
         self.city_label = QLabel()
         self.__input_hint = QLabel('Название города')
         self.city_input = QLineEdit()
@@ -41,9 +46,17 @@ class MainWindow(QWidget):
         self.forecast_description_2 = QLabel()
         self.forecast_description_3 = QLabel()
 
-        self.init_gui()
+
+        self.init_gui()  # Переход к настройке окон
 
     def init_gui(self):
+        """
+
+        Returns:
+             Настраивает виджеты. Устанавливает размеры, расположение
+        и выравнивание виджетов.
+        """
+        self.setMinimumSize(700, 700)
         self.refresh_button.setFixedSize(120,120)
 
         layout = QGridLayout()
@@ -70,36 +83,41 @@ class MainWindow(QWidget):
         layout.addWidget(self.visibility_label, 3, 2)
         layout.addWidget(self.pressure_label, 3, 3,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_label, 4, 1)
-        layout.addWidget(self.day_1_label, 5, 0,
+        layout.addWidget(self.forecast_label, 5, 1)
+        layout.addWidget(self.day_1_label, 6, 0,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.day_2_label, 5, 1,
+        layout.addWidget(self.day_2_label, 6, 1,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.day_3_label, 5, 2,
+        layout.addWidget(self.day_3_label, 6, 2,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_emoji_label_1, 6, 0,
+        layout.addWidget(self.forecast_emoji_label_1, 7, 0,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_emoji_label_2, 6, 1,
+        layout.addWidget(self.forecast_emoji_label_2, 7, 1,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_emoji_label_3, 6, 2,
+        layout.addWidget(self.forecast_emoji_label_3, 7, 2,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.refresh_button, 6, 3,
+        layout.addWidget(self.refresh_button, 7, 4,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_label_1, 7, 0,
+        layout.addWidget(self.forecast_label_1, 8, 0,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_label_2, 7, 1,
+        layout.addWidget(self.forecast_label_2, 8, 1,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_label_3, 7, 2,
+        layout.addWidget(self.forecast_label_3, 8, 2,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_description_1, 8, 0,
+        layout.addWidget(self.forecast_description_1, 9, 0,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_description_2, 8, 1,
+        layout.addWidget(self.forecast_description_2, 9, 1,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_description_3, 8, 2,
+        layout.addWidget(self.forecast_description_3, 9, 2,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        self.set_style()
+
+        self.set_style()  # Переход к настройке шрифтов
 
     def set_style(self):
+        """
+        Returns:
+            Устанавливает шрифты для виджетов.
+        """
 
         self.city_label.setStyleSheet('font-size: 40px;'
                                       'font-weight: bold')
@@ -131,33 +149,62 @@ class MainWindow(QWidget):
         self.forecast_description_2.setStyleSheet('font-size: 23px')
         self.forecast_description_3.setStyleSheet('font-size: 23px')
 
+        # После настройки виджетов, при запуске окна приложения
+        # выполняются методы get_weather и 'load_last_city' из модуля
+        # 'logical_module.py' класса 'WeatherApp' для загрузки из
+        # списка городов, последнего просмотренного при закрытии
+        # приложения города и показа погоды по нему.
         WeatherApp.get_weather(WeatherApp.load_last_city(), self)
 
-        self.show()
-
-        self.click_button()
+        self.click_button()  # Переход к привязке кнопочных виджетов/
 
     def click_button(self):
+        """
+            Настройка отклика кнопок.
+        Returns:
+            При нажатии на кнопку 'city_button' происходит выполнение
+        'get_weather' и очистка поля ввода запроса 'city_input'.
+        """
 
         self.city_button.clicked.connect(self.get_weather)
         self.city_button.clicked.connect(self.city_input.clear)
-
         self.refresh_button.clicked.connect(self.refresh_weather)
 
     def get_weather(self):
+        """
+           Реализуется при нажатии кнопки city_button.
+
+        Returns:
+            Вызывает метод ''get_weather из класса 'WeatherApp' модуля
+            'logical_module', который принимает текст из строки поиска
+            виджета 'city_input'.
+
+            Так же передает экземпляр класса в качестве аргумента
+            в класс WeatherApp в модуле 'logical_module', где
+            выполняется логическая часть программы в целях поддержания
+            связи с атрибутами данного класса.
+        """
         WeatherApp.get_weather(self.city_input.text(), self)
 
 
     def refresh_weather(self):
+        """
+        Returns:
+        Вызывает методы 'get_weather' и 'load_last_city' из класса
+        'WeatherApp' модуля 'logical_module'
+
+        Так же передает экземпляр класса в качестве аргумента
+        в класс WeatherApp в модуле 'logical_module', где выполняется
+        логическая часть программы в целях поддержания связи
+        с атрибутами данного класса.
+        """
         WeatherApp.get_weather(WeatherApp.load_last_city(), self)
-
-
-
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
+    window.show()
     sys.exit(app.exec())
 
 
