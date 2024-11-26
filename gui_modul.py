@@ -1,7 +1,7 @@
 import sys
 
-
-from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QLabel, QGridLayout
+from PyQt6.QtWidgets import (QApplication, QWidget, QPushButton, QLineEdit,
+                             QLabel, QGridLayout)
 from PyQt6.QtCore import Qt
 
 from logical_module import WeatherApp
@@ -19,11 +19,12 @@ class MainWindow(QWidget):
         super().__init__()
 
         self.setWindowTitle('Погода')
+        self.empty_label_above_city = QLabel()
         self.city_label = QLabel()
         self.__input_hint = QLabel('Название города')
         self.city_input = QLineEdit()
         self.city_button = QPushButton('Узнать погоду')
-        self.refresh_button = QPushButton('🔘\nОБНОВИТЬ')
+        self.refresh_button = QPushButton('ОБНОВИТЬ\nПОГОДУ')
         self.temperature_now_label = QLabel()
         self.feels_like_label = QLabel()
         self.emoji_label = QLabel()
@@ -33,6 +34,7 @@ class MainWindow(QWidget):
         self.wind_label = QLabel()
         self.pressure_label = QLabel()
         self.forecast_label = QLabel('ПРОГНОЗ НА 3 ДНЯ')
+        self.empty_label_after_forecast_label = QLabel()
         self.day_1_label = QLabel()
         self.day_2_label = QLabel()
         self.day_3_label = QLabel()
@@ -46,18 +48,16 @@ class MainWindow(QWidget):
         self.forecast_description_2 = QLabel()
         self.forecast_description_3 = QLabel()
 
-
         self.init_gui()  # Переход к настройке окон
 
     def init_gui(self):
         """
-
         Returns:
              Настраивает виджеты. Устанавливает размеры, расположение
         и выравнивание виджетов.
         """
         self.setMinimumSize(700, 700)
-        self.refresh_button.setFixedSize(120,120)
+        self.refresh_button.setFixedSize(120, 120)
 
         layout = QGridLayout()
         self.setLayout(layout)
@@ -67,48 +67,52 @@ class MainWindow(QWidget):
         layout.addWidget(self.city_input, 0, 3)
         layout.addWidget(self.city_button, 0, 4,
                          alignment=Qt.AlignmentFlag.AlignLeft)
-        layout.addWidget(self.city_label, 1, 1,
+        layout.addWidget(self.empty_label_above_city, 1, 1)
+        layout.addWidget(self.city_label, 2, 1, 1, 2,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.temperature_now_label, 3, 0,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.emoji_label, 3, 1,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.description_label, 3, 2,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.wind_label, 3, 3,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.feels_like_label, 4, 0,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.humidity_label, 4, 1,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.visibility_label, 4, 2,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.pressure_label, 4, 3,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.empty_label_after_forecast_label, 5, 1, 1, 1)
+        layout.addWidget(self.forecast_label, 6, 1, 1, 3)
+        layout.addWidget(self.day_1_label, 7, 0,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.day_2_label, 7, 1,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.day_3_label, 7, 2,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.forecast_emoji_label_1, 8, 0,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.forecast_emoji_label_2, 8, 1,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.forecast_emoji_label_3, 8, 2,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.refresh_button, 8, 3,
                          alignment=Qt.AlignmentFlag.AlignRight)
-        layout.addWidget(self.temperature_now_label, 2, 0,
+        layout.addWidget(self.forecast_label_1, 9, 0,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.emoji_label, 2, 1,
+        layout.addWidget(self.forecast_label_2, 9, 1,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.description_label, 2, 2)
-        layout.addWidget(self.wind_label, 2, 3,
+        layout.addWidget(self.forecast_label_3, 9, 2,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.feels_like_label, 3, 0,
+        layout.addWidget(self.forecast_description_1, 10, 0,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.humidity_label, 3, 1,
+        layout.addWidget(self.forecast_description_2, 10, 1,
                          alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.visibility_label, 3, 2)
-        layout.addWidget(self.pressure_label, 3, 3,
-                         alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_label, 5, 1)
-        layout.addWidget(self.day_1_label, 6, 0,
-                         alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.day_2_label, 6, 1,
-                         alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.day_3_label, 6, 2,
-                         alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_emoji_label_1, 7, 0,
-                         alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_emoji_label_2, 7, 1,
-                         alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_emoji_label_3, 7, 2,
-                         alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.refresh_button, 7, 4,
-                         alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_label_1, 8, 0,
-                         alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_label_2, 8, 1,
-                         alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_label_3, 8, 2,
-                         alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_description_1, 9, 0,
-                         alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_description_2, 9, 1,
-                         alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.forecast_description_3, 9, 2,
+        layout.addWidget(self.forecast_description_3, 10, 2,
                          alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.set_style()  # Переход к настройке шрифтов
@@ -121,26 +125,39 @@ class MainWindow(QWidget):
 
         self.city_label.setStyleSheet('font-size: 40px;'
                                       'font-weight: bold')
-        self.forecast_label.setStyleSheet('font-size: 30px')
-        self.description_label.setStyleSheet('font-size: 20px')
+        self.forecast_label.setStyleSheet('font-size: 30px;'
+                                          'font-weight: bold')
+        self.description_label.setStyleSheet('font-size: 20px;'
+                                             'font-weight: bold')
+
         self.wind_label.setStyleSheet('font-size: 20px; font-weight: bold')
-        self.feels_like_label.setStyleSheet('font-size: 20px')
-        self.visibility_label.setStyleSheet('font-size: 20px')
+        self.feels_like_label.setStyleSheet('font-size: 20px;'
+                                            'font-weight: bold')
+
+        self.visibility_label.setStyleSheet('font-size: 20px;'
+                                            'font-weight: bold')
+
         self.pressure_label.setStyleSheet('font-size: 20px; font-weight: bold')
         self.emoji_label.setStyleSheet('font-size: 60px; '
                                        'font-family: Segoe UI emoji')
+
         self.humidity_label.setStyleSheet('font-size: 25px; font-weight: bold')
         self.day_1_label.setStyleSheet('font-size: 25px; font-weight: bold')
         self.day_2_label.setStyleSheet('font-size: 25px; font-weight: bold')
         self.day_3_label.setStyleSheet('font-size: 25px; font-weight: bold')
         self.forecast_emoji_label_1.setStyleSheet('font-size: 50px; '
-                                 'font-family: Segoe UI emoji')
+                                                  'font-family: '
+                                                  'Segoe UI emoji')
+
         self.forecast_emoji_label_2.setStyleSheet('font-size: 50px; '
-                                 'font-family: Segoe UI emoji')
+                                                  'font-family:'
+                                                  'Segoe UI emoji')
+
         self.forecast_emoji_label_3.setStyleSheet('font-size: 50px; '
-                                 'font-family: Segoe UI emoji')
-        self.refresh_button.setStyleSheet('font-size: 20px; '
-                                 'font-family: Segoe UI emoji')
+                                                  'font-family:'
+                                                  'Segoe UI emoji')
+
+        self.refresh_button.setStyleSheet('font-size: 20px;')
         self.forecast_label_2.setStyleSheet('font-size: 35px;'
                                             'font-weight: bold')
         self.forecast_label_3.setStyleSheet('font-size: 35px;'
@@ -186,7 +203,6 @@ class MainWindow(QWidget):
         """
         WeatherApp.get_weather(self.city_input.text(), self)
 
-
     def refresh_weather(self):
         """
         Returns:
@@ -206,9 +222,3 @@ if __name__ == '__main__':
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
-
-
-
-
-
-

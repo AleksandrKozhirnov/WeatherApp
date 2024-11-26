@@ -1,6 +1,6 @@
-
 import requests
-from  datetime import datetime, timedelta
+
+from datetime import datetime, timedelta
 from collections import Counter
 
 
@@ -69,43 +69,52 @@ class WeatherApp:
             match response.status_code:
                 case 400:
                     WeatherApp.weather_error(
-                        'Bad Request\nПроверьте, корректность запроса', self)
+                        'Bad Request\n'
+                        'Проверьте, корректность запроса', self)
                 case 401:
                     WeatherApp.weather_error(
-                        'Unauthorized\nAPI-key не действителен/не активен', self)
+                        'Unauthorized\n'
+                        'API-key не действителен/не активен', self)
                 case 403:
-                    WeatherApp.weather_error('Forbidden\nДоступ запрещен', self)
+                    WeatherApp.weather_error('Forbidden\n'
+                                             'Доступ запрещен', self)
                 case 404:
-                    WeatherApp.weather_error('Not Found\nГород не найден', self)
+                    WeatherApp.weather_error('Not Found\n'
+                                             'Город не найден', self)
                 case 500:
-                    WeatherApp.weather_error('Internal Server Error\nПожалуйста, '
-                                       'повторите попытку позже', self)
+                    WeatherApp.weather_error('Internal Server Error\n'
+                                             'Пожалуйста, '
+                                             'повторите попытку позже', self)
                 case 502:
-                    WeatherApp.weather_error(
-                        ' Bad Gateway\nНекорректный ответ от сервера', self)
+                    WeatherApp.weather_error('Bad Gateway\n'
+                                             'Некорректный ответ от сервера',
+                                             self)
                 case 503:
-                    WeatherApp.weather_error(
-                        'Service Unavailable\nСервер не работает', self)
+                    WeatherApp.weather_error('Service Unavailable\n'
+                                             'Сервер не работает', self)
                 case 504:
-                    WeatherApp.weather_error(
-                        'Gateway Timeout\nСервер не отвечает', self)
+                    WeatherApp.weather_error('Gateway Timeout\n'
+                                             'Сервер не отвечает', self)
                 case _:
-                    WeatherApp.weather_error(
-                        f'Произошла ошибка HTTP\n{HTTP_error} ', self)
-
+                    WeatherApp.weather_error(f'Произошла ошибка HTTP\n'
+                                             f'{HTTP_error} ', self)
 
         except requests.exceptions.ConnectionError:
-            WeatherApp.weather_error(
-                f'Connection Error\nПроверьте подключение к сети Интернет.', self)
+            WeatherApp.weather_error('Connection Error\n'
+                                     'Проверьте подключение к сети Интернет.',
+                                     self)
 
         except requests.exceptions.Timeout:
-            WeatherApp.weather_error(f'Timeout Error\nДолгое ожидание ответа.', self)
+            WeatherApp.weather_error('Timeout Error\n'
+                                     'Долгое ожидание ответа.', self)
 
         except requests.exceptions.TooManyRedirects:
-            WeatherApp.weather_error(f'Too many Redirects\nПроверь URL.', self)
+            WeatherApp.weather_error('Too many Redirects\n'
+                                     'Проверь URL.', self)
 
         except requests.exceptions.RequestException as request_error:
-            WeatherApp.weather_error(f'Request Error\n{request_error}', self)
+            WeatherApp.weather_error(f'Request Error\n'
+                                     f'{request_error}', self)
 
     @staticmethod
     def display_weather(data, self):
@@ -128,7 +137,7 @@ class WeatherApp:
         # Перенастройка шрифта, т.к. он может меняться при выводе
         # ошибок при срабатывании метода 'weather_error'.
         self.temperature_now_label.setStyleSheet('font-size: 40px; '
-                                           'font-weight: bold')
+                                                 'font-weight: bold')
         temperature_value = data['main']['temp']
         self.temperature_now_label.setText(f'{temperature_value:.0f} C°')
         feeling_value = data['main']['feels_like']
@@ -172,7 +181,6 @@ class WeatherApp:
             self.pressure_label.setText(f'   {pressure_value:.0f}\nмм рт.ст.')
         except KeyError:
             self.pressure_label.setText('Информация о давлении\nотсутствует')
-
 
     @staticmethod
     def get_weather_forecast(lon, lat, self):
@@ -232,22 +240,30 @@ class WeatherApp:
                 # списки.
                 for i in data['list']:
                     if (int(datetime.fromtimestamp(i['dt']).strftime('%d'))
-                            == int((datetime.now()+timedelta(days=1)).strftime('%d'))):
+                            == int((datetime.now() +
+                                    timedelta(days=1)).strftime('%d'))):
                         list_temp_1.append(i['main']['temp'])
-                        list_description_1.append(i['weather'][0]['description'])
+                        list_description_1.append(
+                            i['weather'][0]['description']
+                        )
                         list_weather_id_1.append(i['weather'][0]['id'])
 
-
                     elif (int(datetime.fromtimestamp(i['dt']).strftime('%d'))
-                            == int((datetime.now()+timedelta(days=2)).strftime('%d'))):
+                            == int((datetime.now() +
+                                    timedelta(days=2)).strftime('%d'))):
                         list_temp_2.append(i['main']['temp'])
-                        list_description_2.append(i['weather'][0]['description'])
+                        list_description_2.append(
+                            i['weather'][0]['description']
+                        )
                         list_weather_id_2.append(i['weather'][0]['id'])
 
                     elif (int(datetime.fromtimestamp(i['dt']).strftime('%d'))
-                            == int((datetime.now()+timedelta(days=3)).strftime('%d'))):
+                            == int((datetime.now() +
+                                    timedelta(days=3)).strftime('%d'))):
                         list_temp_3.append(i['main']['temp'])
-                        list_description_3.append(i['weather'][0]['description'])
+                        list_description_3.append(
+                            i['weather'][0]['description']
+                        )
                         list_weather_id_3.append(i['weather'][0]['id'])
 
                 # Новые списки с усредненными значениями температуры,
@@ -292,7 +308,8 @@ class WeatherApp:
                 # список кортежей в формате:
                 #                 (температура, описание, id погоды)
                 zipped = zip(forecast_temp, forecast_description,
-                                 forecast_id)
+                             forecast_id)
+
                 final_data = list(zipped)
 
                 print(final_data)  # Для внутреннего пользования
@@ -313,10 +330,10 @@ class WeatherApp:
                         self)
                 case 403:
                     WeatherApp.forecast_error('Forbidden\nДоступ запрещен',
-                                             self)
+                                              self)
                 case 404:
                     WeatherApp.forecast_error('Not Found\nГород не найден',
-                                             self)
+                                              self)
                 case 500:
                     WeatherApp.forecast_error(
                         'Internal Server Error\nПожалуйста, '
@@ -334,18 +351,18 @@ class WeatherApp:
                     WeatherApp.forecast_error(
                         f'Произошла ошибка HTTP\n{HTTP_error} ', self)
 
-
         except requests.exceptions.ConnectionError:
-            WeatherApp.forecast_error(
-                f'Connection Error\nПроверьте подключение к сети Интернет.',
-                self)
+            WeatherApp.forecast_error('Connection Error\n'
+                                      'Проверьте подключение к сети Интернет.',
+                                      self)
 
         except requests.exceptions.Timeout:
-            WeatherApp.forecast_error(f'Timeout Error\nДолгое ожидание ответа.',
-                                     self)
+            WeatherApp.forecast_error('Timeout Error\n'
+                                      'Долгое ожидание ответа.', self)
 
         except requests.exceptions.TooManyRedirects:
-            WeatherApp.forecast_error(f'Too many Redirects\nПроверь URL.', self)
+            WeatherApp.forecast_error('Too many Redirects\n'
+                                      'Проверь URL.', self)
 
         except requests.exceptions.RequestException as request_error:
             WeatherApp.forecast_error(f'Request Error\n{request_error}', self)
@@ -368,19 +385,17 @@ class WeatherApp:
         # Заполняет информационные виджеты на экране приложения
         # (атрибуты класса MainWindow).
 
-        self.day_1_label.setText(f'{(datetime.now()+
+        self.day_1_label.setText(f'{(datetime.now() +
                                      timedelta(days=1)).strftime('%d.%m')}')
-        self.day_2_label.setText(f'{(datetime.now()+
+        self.day_2_label.setText(f'{(datetime.now() +
                                      timedelta(days=2)).strftime('%d.%m')}')
-        self.day_3_label.setText(f'{(datetime.now()+
+        self.day_3_label.setText(f'{(datetime.now() +
                                      timedelta(days=3)).strftime('%d.%m')}')
-
 
         # get_emoji - статический метод для расшифровки id погоды.
         # Описан ниже
         emoji_value_1 = WeatherApp.get_emoji(data[0][2])
         self.forecast_emoji_label_1.setText(f'{emoji_value_1}')
-
 
         emoji_value_2 = WeatherApp.get_emoji(data[1][2])
         self.forecast_emoji_label_2.setText(f'{emoji_value_2}')
@@ -407,7 +422,6 @@ class WeatherApp:
 
         descr_value_3 = data[2][1]
         self.forecast_description_3.setText(f'{descr_value_3.capitalize()}')
-
 
     @staticmethod
     def weather_error(message, self):
@@ -478,7 +492,6 @@ class WeatherApp:
         self.forecast_description_3.clear()
         self.forecast_label_1.setText(message)
 
-
     @staticmethod
     def save_list_city(city):
         """
@@ -495,7 +508,6 @@ class WeatherApp:
     @staticmethod
     def load_last_city():
         """
-
         Returns:
             Загружает данные из файла с городами. Используется при
             запуске программы. При отсутствии файла создает новый.
@@ -564,4 +576,3 @@ class WeatherApp:
             return 'Западный'
         elif 292.5 <= wind_deg_value <= 337.5:
             return 'СЗ'
-
